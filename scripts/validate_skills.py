@@ -12,14 +12,38 @@ from urllib.parse import unquote, urlsplit
 
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ROOT_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
-METADATA_KEY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 LOCAL_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 INVALID_PLAIN_START = ("[", "{", "&", "*", "!", "|", ">", "@", "`", "?", ":")
 
 
+def _strip_yaml_comment(value: str) -> str:
+    quote: str | None = None
+    index = 0
+    while index < len(value):
+        char = value[index]
+        if quote == "'":
+            if char == "'" and index + 1 < len(value) and value[index + 1] == "'":
+                index += 2
+                continue
+            if char == "'":
+                quote = None
+        elif quote == '"':
+            if char == "\\":
+                index += 2
+                continue
+            if char == '"':
+                quote = None
+        elif char in ("'", '"'):
+            quote = char
+        elif char == "#" and (index == 0 or value[index - 1].isspace()):
+            return value[:index].rstrip()
+        index += 1
+    return value.rstrip()
+
+
 def _scalar(value: str, line: int, errors: list[str]) -> str | None:
     """Parse the simple string-scalar subset used by the catalog contract."""
-    value = re.sub(r"\s+#.*$", "", value).strip()
+    value = _strip_yaml_comment(value).strip()
     if not value:
         errors.append(f"line {line}: expected a non-empty string scalar")
         return None
@@ -36,11 +60,23 @@ def _scalar(value: str, line: int, errors: list[str]) -> str | None:
         if len(value) < 2 or not value.endswith("'"):
             errors.append(f"line {line}: invalid single-quoted string")
             return None
-        parsed = value[1:-1].replace("''", "'")
-        if "'" in parsed or not parsed:
-            errors.append(f"line {line}: invalid or empty single-quoted string")
+        inner = value[1:-1]
+        parsed: list[str] = []
+        index = 0
+        while index < len(inner):
+            if inner[index] == "'":
+                if index + 1 == len(inner) or inner[index + 1] != "'":
+                    errors.append(f"line {line}: invalid single-quoted string")
+                    return None
+                parsed.append("'")
+                index += 2
+            else:
+                parsed.append(inner[index])
+                index += 1
+        if not parsed:
+            errors.append(f"line {line}: empty single-quoted string")
             return None
-        return parsed
+        return "".join(parsed)
     if (
         value.startswith(INVALID_PLAIN_START)
         or re.match(r"^(?:~|null|true|false|yes|no|on|off)$", value, re.IGNORECASE)
@@ -152,16 +188,26 @@ def _validate_scripts(skill_dir: Path, errors: list[str]) -> None:
     scripts_dir = skill_dir / "scripts"
     if not scripts_dir.is_dir():
         return
-    scripts = sorted(
-        path for path in scripts_dir.rglob("*") if path.is_file() and path.name != "README.md"
-    )
+    if scripts_dir.is_symlink():
+        errors.append("scripts/ must not be a symbolic link")
+        return
+    entries = sorted(scripts_dir.rglob("*"))
+    symlinks = [path for path in entries if path.is_symlink()]
+    if symlinks:
+        errors.append("scripts/ must not contain symbolic links")
+    scripts = [path for path in entries if path.is_file() and not path.is_symlink() and path.name != "README.md"]
     if not scripts:
+        errors.append("scripts/ must contain at least one script")
         return
     readme = scripts_dir / "README.md"
-    if not readme.is_file():
+    if not readme.is_file() or readme.is_symlink():
         errors.append("scripts/README.md is required when scripts are present")
         return
-    text = readme.read_text(encoding="utf-8")
+    try:
+        text = readme.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        errors.append(f"cannot read scripts/README.md as UTF-8: {error}")
+        return
     sections = list(re.finditer(r"(?m)^###\s+(.+?)\s*$", text))
     for script in scripts:
         relative = script.relative_to(skill_dir).as_posix()
@@ -214,6 +260,13 @@ def validate_skill(skill_dir: Path, names: set[str]) -> list[str]:
     compatibility = data.get("compatibility")
     if isinstance(compatibility, str) and len(compatibility) > 500:
         errors.append("'compatibility' exceeds the 500-character specification limit")
+    references_dir = skill_dir / "references"
+    if references_dir.is_symlink():
+        errors.append("references/ must not be a symbolic link")
+    elif references_dir.is_dir() and not any(
+        path.is_file() for path in references_dir.rglob("*")
+    ):
+        errors.append("references/ must contain at least one reference file")
     _validate_links(skill_dir, body, errors)
     _validate_scripts(skill_dir, errors)
     return errors
@@ -226,7 +279,11 @@ def validate_catalog(skills_dir: Path) -> list[str]:
         return [f"{skills_dir}: skills path is not a directory"]
     errors: list[str] = []
     names: set[str] = set()
-    for skill_dir in sorted(path for path in skills_dir.iterdir() if path.is_dir()):
+    entries = sorted(skills_dir.iterdir())
+    for entry in entries:
+        if not entry.is_dir():
+            errors.append(f"{entry.name}: expected a skill directory")
+    for skill_dir in (path for path in entries if path.is_dir()):
         for message in validate_skill(skill_dir, names):
             errors.append(f"{skill_dir.name}: {message}")
     return errors
@@ -245,7 +302,11 @@ def main() -> int:
     if errors:
         print("\n".join(f"ERROR: {error}" for error in errors), file=sys.stderr)
         return 1
-    skill_count = sum(1 for item in args.skills_dir.iterdir() if item.is_dir()) if args.skills_dir.is_dir() else 0
+    skill_count = (
+        sum(1 for item in args.skills_dir.iterdir() if item.is_dir())
+        if args.skills_dir.is_dir()
+        else 0
+    )
     print(f"Validated {skill_count} skill(s).")
     if skill_count == 0:
         print("No skills found; the catalog is ready for its first reviewed skill.")

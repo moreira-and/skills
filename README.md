@@ -29,6 +29,8 @@ description: Explains the specific task this skill performs and its activation b
 
 The specification also permits `license`, `compatibility` (up to 500 characters), `metadata` (string keys and values), and experimental `allowed-tools` (space-separated string). Use an optional field only when applicable; omit `compatibility` if there are no special environment requirements, and avoid `allowed-tools` unless the intended consumer supports it. Do not add custom top-level fields. Keep quoted YAML values simple; descriptions that contain YAML punctuation should be quoted.
 
+The dependency-free validator accepts single-line YAML string scalars (plain, single-quoted, or JSON-compatible double-quoted) and a two-space-indented `metadata` mapping. It intentionally rejects YAML features outside this small catalog contract, such as folded or multiline values, anchors, and tags; use a simple quoted scalar instead.
+
 The body should state the skill's purpose and scope, when not to use it, and short operational steps. Distinguish mandatory rules from recommendations and examples. Link local references and script instructions explicitly. Detailed quality and semantic-review criteria are in the [constitution](.specify/memory/constitution.md).
 
 ## Create, validate, and review

@@ -41,10 +41,32 @@ class ValidateSkillsTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Validated 1 skill(s).", result.stdout)
 
+    def test_accepts_supported_optional_metadata_and_quoted_comments(self):
+        skill = self.add_skill()
+        (skill / "SKILL.md").write_text(
+            '---\nname: catalog-check\n'
+            'description: "Checks skill metadata # without truncation. Use when reviewing skills."\n'
+            "compatibility: 'Python 3.12' # optional runtime\n"
+            "metadata:\n  team: 'agent''s tools'\n---\n\nFollow the review steps.\n",
+            encoding="utf-8",
+        )
+        result = self.validate()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_empty_catalog_is_valid_without_placeholder(self):
         result = self.validate()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("No skills found", result.stdout)
+
+    def test_rejects_empty_optional_directories_and_root_files(self):
+        skill = self.add_skill()
+        (skill / "references").mkdir()
+        (skill / "scripts").mkdir()
+        (self.skills_dir / "stray.md").write_text("not a skill\n", encoding="utf-8")
+        result = self.validate()
+        self.assertIn("references/ must contain at least one", result.stderr)
+        self.assertIn("scripts/ must contain at least one", result.stderr)
+        self.assertIn("expected a skill directory", result.stderr)
 
     def test_requires_valid_frontmatter_and_required_fields(self):
         skill = self.add_skill()
@@ -63,6 +85,12 @@ class ValidateSkillsTests(unittest.TestCase):
         self.assertIn("must match directory", result.stderr)
         self.assertIn("duplicate skill name", result.stderr)
 
+    def test_rejects_invalid_names_and_overlong_descriptions(self):
+        self.add_skill(name="invalid_name", description="A" * 1025 + " Use when reviewing.")
+        result = self.validate()
+        self.assertIn("lowercase letters, digits, or single hyphens", result.stderr)
+        self.assertIn("1024-character specification limit", result.stderr)
+
     def test_requires_description_activation_cue_and_length(self):
         self.add_skill(description="A generic skill.")
         result = self.validate()
@@ -73,6 +101,12 @@ class ValidateSkillsTests(unittest.TestCase):
         self.add_skill(body="Read [the guide](references/missing.md).")
         result = self.validate()
         self.assertIn("does not exist", result.stderr)
+
+    def test_rejects_reference_that_escapes_skill_directory(self):
+        skill = self.add_skill(body="Read [the secret](../outside.md).")
+        (skill.parent / "outside.md").write_text("not part of the skill\n", encoding="utf-8")
+        result = self.validate()
+        self.assertIn("escapes the skill directory", result.stderr)
 
     def test_scripts_require_usage_and_dependency_documentation(self):
         skill = self.add_skill()
