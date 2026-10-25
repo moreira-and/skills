@@ -195,7 +195,11 @@ def _validate_scripts(skill_dir: Path, errors: list[str]) -> None:
     symlinks = [path for path in entries if path.is_symlink()]
     if symlinks:
         errors.append("scripts/ must not contain symbolic links")
-    scripts = [path for path in entries if path.is_file() and not path.is_symlink() and path.name != "README.md"]
+    scripts = [
+        path
+        for path in entries
+        if path.is_file() and not path.is_symlink() and path.name != "README.md"
+    ]
     if not scripts:
         errors.append("scripts/ must contain at least one script")
         return
@@ -263,9 +267,7 @@ def validate_skill(skill_dir: Path, names: set[str]) -> list[str]:
     references_dir = skill_dir / "references"
     if references_dir.is_symlink():
         errors.append("references/ must not be a symbolic link")
-    elif references_dir.is_dir() and not any(
-        path.is_file() for path in references_dir.rglob("*")
-    ):
+    elif references_dir.is_dir() and not any(path.is_file() for path in references_dir.rglob("*")):
         errors.append("references/ must contain at least one reference file")
     _validate_links(skill_dir, body, errors)
     _validate_scripts(skill_dir, errors)

@@ -18,7 +18,9 @@ class ValidateSkillsTests(unittest.TestCase):
         self.skills_dir = Path(self.temporary_directory.name) / "skills"
         self.skills_dir.mkdir()
 
-    def add_skill(self, name="catalog-check", description=VALID_DESCRIPTION, body="Follow the review steps."):
+    def add_skill(
+        self, name="catalog-check", description=VALID_DESCRIPTION, body="Follow the review steps."
+    ):
         skill_dir = self.skills_dir / name
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text(
@@ -44,8 +46,9 @@ class ValidateSkillsTests(unittest.TestCase):
     def test_accepts_supported_optional_metadata_and_quoted_comments(self):
         skill = self.add_skill()
         (skill / "SKILL.md").write_text(
-            '---\nname: catalog-check\n'
-            'description: "Checks skill metadata # without truncation. Use when reviewing skills."\n'
+            "---\nname: catalog-check\n"
+            'description: "Checks skill metadata # without truncation. '
+            'Use when reviewing skills."\n'
             "compatibility: 'Python 3.12' # optional runtime\n"
             "metadata:\n  team: 'agent''s tools'\n---\n\nFollow the review steps.\n",
             encoding="utf-8",
@@ -80,7 +83,10 @@ class ValidateSkillsTests(unittest.TestCase):
         self.add_skill(name="second-skill")
         for skill in (self.skills_dir / "first-skill", self.skills_dir / "second-skill"):
             file = skill / "SKILL.md"
-            file.write_text(file.read_text(encoding="utf-8").replace(f"name: {skill.name}", "name: same-skill"), encoding="utf-8")
+            file.write_text(
+                file.read_text(encoding="utf-8").replace(f"name: {skill.name}", "name: same-skill"),
+                encoding="utf-8",
+            )
         result = self.validate()
         self.assertIn("must match directory", result.stderr)
         self.assertIn("duplicate skill name", result.stderr)

@@ -36,21 +36,29 @@ The body should state the skill's purpose and scope, when not to use it, and sho
 ## Create, validate, and review
 
 1. Add `skills/<unique-name>/SKILL.md` with the contract above. Add focused references and/or scripts only when they contribute real value.
+
 2. When adding scripts, create `scripts/README.md` with a `### scripts/<file>` section for every script and `Usage:` and `Dependencies:` entries. State `None` when a script has no external dependencies.
-3. Set up the pinned Python environment with [uv](https://docs.astral.sh/uv/):
+
+3. Set up the pinned Python environment and Git hooks with [uv](https://docs.astral.sh/uv/):
 
    ```bash
    uv sync --locked
+   uv run --locked pre-commit install --install-hooks
    uv run --locked python scripts/validate_skills.py
    uv run --locked python -m unittest discover -s tests -v
    ```
 
-   `pyproject.toml` declares the supported Python version and dependencies; `uv.lock` pins the resolved environment. The current validator and tests use only the Python standard library, so no third-party runtime dependencies are installed. Add dependencies with `uv add` or `uv add --dev` and commit the updated lockfile.
+   `pyproject.toml` declares the supported Python version and development tools; `uv.lock` pins the resolved environment. The validator and tests use only the Python standard library. Add dependencies with `uv add` or `uv add --dev` and commit the updated lockfile.
+
 4. In VS Code, install the recommended Python extension and run `uv sync --locked` from the repository root. Workspace settings select `.venv` as the interpreter and enable terminal activation. The checked-in interpreter path targets Linux/macOS; on Windows, select `.venv\Scripts\python.exe` with **Python: Select Interpreter**.
 
    The validator checks metadata and names, description rules, relative local Markdown links, and script documentation. It exits successfully when the catalog has no skills; it does not create a placeholder skill.
-5. Review semantic quality separately: one responsibility, correct activation and non-activation boundaries, concise but sufficient instructions, safe behavior, no contradictions or redundancy, valid references, and usefulness of each script. Structural checks cannot judge these properties.
-6. For a material change, specify, plan, task, implement, and verify with Spec Kit. Trivial corrections can use direct review with relevant checks.
+
+5. Git hooks run automatically after installation: `pre-commit` runs Ruff, Markdown formatting checks, and Codespell on applicable changed files; `pre-push` runs the unit tests. Run all lint hooks manually with `uv run --locked pre-commit run --all-files`, and simulate the push hook with `uv run --locked pre-commit run --hook-stage pre-push --all-files`.
+
+6. Review semantic quality separately: one responsibility, correct activation and non-activation boundaries, concise but sufficient instructions, safe behavior, no contradictions or redundancy, valid references, and usefulness of each script. Structural checks cannot judge these properties.
+
+7. For a material change, specify, plan, task, implement, and verify with Spec Kit. Trivial corrections can use direct review with relevant checks.
 
 ## Spec Kit
 
