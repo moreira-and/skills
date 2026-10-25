@@ -1,0 +1,40 @@
+minimum_pre_commit_version: "4.7.0"
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+default_stages:
+  - pre-commit
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff
+        entry: uv run --locked ruff check
+        language: system
+        types: [python]
+        files: ^(scripts|tests)/.*\.py$
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run --locked ruff format --check
+        language: system
+        types: [python]
+        files: ^(scripts|tests)/.*\.py$
+      - id: mdformat
+        name: Markdown format
+        entry: uv run --locked mdformat --number --check
+        language: system
+        types: [markdown]
+        files: ^(README\.md|\.specify/memory/constitution\.md|skills/.*\.md)$
+      - id: codespell
+        name: Codespell
+        entry: uv run --locked codespell
+        language: system
+        types: [text]
+        files: ^(README\.md|\.specify/memory/constitution\.md|skills/.*|scripts/.*|tests/.*|pyproject\.toml|\.pre-commit-config\.yaml)$
+      - id: unit-tests
+        name: Unit tests
+        entry: uv run --locked python -m unittest discover -s tests -v
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+        always_run: true
