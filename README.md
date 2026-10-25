@@ -1,6 +1,6 @@
 # Corporate Agent Skills Catalog
 
-This repository is the foundation for reusable corporate skills for LLM agents. Its portable catalog includes three capabilities for Databricks SQL quality, Lakeflow pipeline authoring/operations, and PySpark-to-Lakeflow migration.
+This repository is the foundation for reusable corporate skills for LLM agents. Its portable catalog includes four capabilities: Databricks SQL quality, Lakeflow pipeline authoring/operations, PySpark-to-Lakeflow migration, and a migration specialist that orchestrates the other three.
 
 ## Structure
 
@@ -17,6 +17,7 @@ skills/
 - `databricks-sql-quality/`: organizational SQL naming, typing, documentation, and readability conventions.
 - `lakeflow-pipelines/`: Lakeflow object selection, incremental processing, CDC, data quality, and operations.
 - `pyspark-to-lakeflow/`: a gated migration process for converting imperative PySpark pipelines to declarative SQL/DABs.
+- `databricks-migration-engineer/`: a senior data-engineer persona for Databricks migrations. It defines the workflow, safety limits, and report format, and defers technical rules to the three skills above by name. It never deploys, commits, or pushes, and acts only in a test workspace. In Genie Code, install all four skills side by side under `Workspace/.assistant/skills/`; these limits are instructions, not enforced permissions, and invocation and permissions depend on the consumer.
 
 These portable catalog entries are separate from Copilot command skills under `.github/skills/`; catalog presence alone does not install or expose a skill to every agent consumer.
 
