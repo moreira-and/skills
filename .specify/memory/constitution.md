@@ -1,50 +1,32 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Corporate Agent Skills Catalog Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Interoperability First
+Skills MUST follow the official Agent Skills specification. Use only its required fields and supported optional fields; do not rely on consumer-specific metadata or tool behavior without documenting the limitation.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. One Clear Responsibility
+Each skill MUST have one primary capability, a precise activation description, and actionable instructions. Keep essential guidance in `SKILL.md`; load detailed material from explicit, relative references only when needed.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Safe, Reviewable Execution
+Scripts MUST be deterministic where practical, document usage and dependencies, handle errors clearly, and use only the access needed for their task. Instructions MUST preserve applicable security, privacy, quality, and compliance requirements.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Validation Is Necessary, Not Sufficient
+Every change MUST pass structural validation and relevant tests. Human review MUST also assess semantic clarity, activation boundaries, correctness, safety, contradictions, and maintainability; passing a validator alone does not establish skill quality.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Traceable, Incremental Evolution
+Material changes MUST be specified, planned, tasked, implemented, and reviewed with Spec Kit artifacts. Trivial documentation or metadata corrections MAY use a direct review without a full specification cycle. Do not create placeholder skills or artifacts solely to fill a directory.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Quality and Compatibility
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+The catalog contract and commands are documented in `README.md`. Automated checks enforce only documented, deterministic rules; consumer-specific discovery, invocation, and permission behavior MUST be verified for the target agent and MUST NOT be assumed portable.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Contribution Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+For a material change, use the repository's Spec Kit skills to create a specification, plan, and tasks; clarify or analyze when useful; implement and validate; then converge and review. For a trivial change, make the smallest edit, run the relevant checks, and explain the change in review.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution guides specifications, plans, implementation, and review. Amend it when the catalog contract or agreed quality principles change, and keep related documentation and templates consistent. Prefer established interoperable standards; document any intentional deviation and its reason.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-10-25 | **Last Amended**: 2026-10-25
