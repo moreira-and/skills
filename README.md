@@ -1,6 +1,6 @@
 # Corporate Agent Skills Catalog
 
-This repository is the foundation for reusable corporate skills for LLM agents. It currently contains **no corporate skills**; add one only when there is a real, reviewed capability to publish.
+This repository is the foundation for reusable corporate skills for LLM agents. Its portable catalog includes three capabilities for Databricks SQL quality, Lakeflow pipeline authoring/operations, and PySpark-to-Lakeflow migration.
 
 ## Structure
 
@@ -11,6 +11,14 @@ skills/
     references/       # Optional, focused supporting material
     scripts/          # Optional, deterministic tools with documented usage
 ```
+
+## Current Skills
+
+- `databricks-sql-quality/`: organizational SQL naming, typing, documentation, and readability conventions.
+- `lakeflow-pipelines/`: Lakeflow object selection, incremental processing, CDC, data quality, and operations.
+- `pyspark-to-lakeflow/`: a gated migration process for converting imperative PySpark pipelines to declarative SQL/DABs.
+
+These portable catalog entries are separate from Copilot command skills under `.github/skills/`; catalog presence alone does not install or expose a skill to every agent consumer.
 
 Create `references/` and `scripts/` only when needed. Keep each skill's detailed guidance in focused reference files and link to them explicitly from `SKILL.md`. Use relative links from the skill root, no more than one directory deep. Put executable tools in `scripts/`; document each tool's usage and dependencies in `scripts/README.md`.
 
