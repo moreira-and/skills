@@ -1,0 +1,9 @@
+[project]
+name = "corporate-agent-skills"
+version = "0.1.0"
+description = "Validation tooling for the corporate Agent Skills catalog."
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv]
+package = false
